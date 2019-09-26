@@ -7,14 +7,39 @@
 //
 
 import UIKit
+import AVFoundation
 
 class ViewController: UIViewController {
+	
+	private var engine = AVAudioEngine()
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
-		// Do any additional setup after loading the view.
+		
+		let input = engine.inputNode
+		let output = engine.mainMixerNode
+		let format = engine.inputNode.inputFormat(forBus: 0)
+		let delayUnit = AVAudioUnitDelay()
+		delayUnit.delayTime = 2
+		engine.attach(delayUnit)
+		
+		engine.inputNode.volume = 0.0
+		
+		engine.connect(input, to: delayUnit, format: format)
+		engine.connect(delayUnit, to:output, format: format)
 	}
-
-
+	
+	@IBAction func micSwitchValueChanged(_ sw: UISwitch) {
+		if sw.isOn {
+			try! engine.start()
+		}else {
+			engine.stop()
+		}
+	}
+	
+	@IBAction func micVolumeSliderValueChanged(_ slider: UISlider) {
+		engine.inputNode.volume = slider.value / slider.maximumValue
+	}
+	
 }
 
